@@ -1,0 +1,124 @@
+import pyautogui
+import time
+import random
+
+# Шляхи до зображень кнопок "Play Game", "Play Again", "Cosmonaut" та "Prodov"
+image_play_game = 'playgame.bmp'
+image_play_again = 'playagain.bmp'
+image_cosmonavt = 'cosmonavt.bmp'
+image_prodov = 'prodov.bmp'
+
+
+# Затримка (в секундах)
+def sleep(seconds):
+    time.sleep(seconds)
+
+
+# Пошук зображення на екрані
+def find_image(image_path):
+    print(f"Шукаємо зображення: {image_path}")
+    try:
+        # Шукаємо зображення на екрані
+        location = pyautogui.locateCenterOnScreen(image_path, confidence=0.8)
+        if location:
+            print(f"Зображення {image_path} знайдено за координатами: {location}")
+        else:
+            print(f"Зображення {image_path} не знайдено.")
+        return location
+    except Exception as e:
+        print(f"Помилка при пошуку зображення: {e}")
+        return None
+
+
+# Функція для імітації кліку мишкою
+def simulate_left_click(location):
+    if location:
+        pyautogui.moveTo(location)
+        pyautogui.click()
+        print(f"Клік за координатами: {location}")
+    else:
+        print("Координати не знайдено для кліку.")
+
+
+# Функція для очікування наявності кнопок Play Game, Play Again або Prodov
+def wait_for_buttons():
+    while True:
+        button_play_game = find_image(image_play_game)
+        button_play_again = find_image(image_play_again)
+        button_prodov = find_image(image_prodov)
+
+        if button_play_game or button_play_again or button_prodov:
+            # Якщо знайдено хоча б одну з кнопок, виходимо з циклу
+            break
+        else:
+            print("Кнопки Play Game, Play Again або Prodov не знайдено. Повторний пошук через 1 хвилину.")
+            sleep(60)  # Чекаємо 1 хвилину перед повторним пошуком
+
+
+# Основна функція для запуску бота
+def run():
+    while True:
+        # Шукаємо кнопку "Play Game" або "Play Again"
+        print("Перевірка кнопок...")
+        button_play_game = find_image(image_play_game)
+        button_play_again = find_image(image_play_again)
+
+        if button_play_game or button_play_again:
+            if button_play_game:
+                print("Зображення Play Game знайдено.")
+                simulate_left_click(button_play_game)  # Клік на кнопку "Play Game"
+            elif button_play_again:
+                print("Зображення Play Again знайдено.")
+                simulate_left_click(button_play_again)  # Клік на кнопку "Play Again"
+
+            print("Гра почалась! Чекаємо 1 секунду на завантаження.")
+            sleep(1)  # Затримка на 1 секунду перед пошуком космонавта
+
+            print("Шукаємо космонавта.")
+            while True:
+                cosmonavt = find_image(image_cosmonavt)
+                if cosmonavt:
+                    print("Космонавт знайдений. Клацаємо в проміжку від 0.5 до 1.1 секунди.")
+                    # Клацаємо в проміжку від 0.5 до 1.1 секунди, поки космонавт є
+                    while True:
+                        sleep(random.uniform(0.5, 1.1))  # Генеруємо випадкову затримку
+                        cosmonavt = find_image(image_cosmonavt)  # Повторний пошук космонавта
+                        if cosmonavt:
+                            simulate_left_click(cosmonavt)  # Імітуємо клік
+                        else:
+                            print("Космонавт зник. Гра завершилась.")
+                            break  # Виходимо з внутрішнього циклу
+                else:
+                    print("Космонавт не знайдений. Чекаємо 1 секунду перед повторним пошуком.")
+                    sleep(1)  # Затримка на 1 секунду перед повторним пошуком космонавта
+                    break  # Виходимо з циклу пошуку космонавта
+
+            # Після завершення гри, шукаємо кнопки
+            print("Перехід до пошуку кнопок після завершення гри.")
+            sleep(5)  # Додаємо затримку на 5 секунд
+
+            while True:
+                button_play_game = find_image(image_play_game)
+                button_play_again = find_image(image_play_again)
+                button_prodov = find_image(image_prodov)
+
+                if button_play_game or button_play_again:
+                    # Якщо кнопки знайдено, виходимо з циклу
+                    print("Знайдено кнопку Play Game або Play Again. Перезапускаємо цикл.")
+                    break
+
+                if button_prodov:
+                    print("Зображення Prodov знайдено.")
+                    simulate_left_click(button_prodov)  # Клік на кнопку "Prodov"
+                    print("Очікуємо 1 хвилину після клацання на Prodov.")
+                    sleep(60)  # Очікуємо 1 хвилину і потім повторюємо пошук
+                    wait_for_buttons()  # Очікуємо наявності кнопок після клацання на Prodov
+                    break  # Виходимо з циклу після клацання
+
+                print("Кнопки Play Game, Play Again або Prodov не знайдено. Повторний пошук через 1 хвилину.")
+                sleep(60)  # Очікуємо 1 хвилину і повторюємо пошук
+
+
+# Запуск бота
+if __name__ == "__main__":
+    run()
